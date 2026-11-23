@@ -14,8 +14,12 @@ PORT = 10000
 # Укажите ваш числовой Telegram ID, чтобы заявки на вывод приходили вам в личку
 ADMIN_ID = 000000000  # <--- Замените на ваш ID
 
-# Настраиваем кастомный API Shuzagram с флагом local=True для отключения строгой валидации
-shuzagram_server = TelegramAPIServer.from_base("https://api.shuzagram.com", local=True)
+# Создаем кастомный сервер API через явное указание base и file (обход проверки pydantic)
+shuzagram_server = TelegramAPIServer(
+    base="https://api.shuzagram.com/bot{token}/{method}",
+    file="https://api.shuzagram.com/file/bot{token}/{path}"
+)
+
 session = AiohttpSession(api=shuzagram_server)
 bot = Bot(token=TOKEN, session=session)
 dp = Dispatcher()
