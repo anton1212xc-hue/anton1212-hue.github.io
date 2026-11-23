@@ -332,6 +332,11 @@
             gap: 12px;
         }
 
+        .profile-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
         .id-badge {
             background: rgba(255, 255, 255, 0.06);
             padding: 6px 10px;
@@ -588,7 +593,7 @@
             <div class="username" id="userName">Player</div>
         </div>
         <div class="balance-card">
-            ⭐ <span id="userBalance">0</span>
+            ⭐ <span id="userBalance">50</span>
             <button class="add-stars" onclick="openDepositModal()">+</button>
         </div>
     </div>
@@ -646,7 +651,10 @@
                         <span id="profileId">ID: 000000</span> 📋
                     </div>
                 </div>
-                <button class="btn" onclick="openDepositModal()">Пополнить баланс ⭐</button>
+                <div class="profile-buttons">
+                    <button class="btn" onclick="openDepositModal()">Пополнить ⭐</button>
+                    <button class="btn" style="background:#ef4444; color:#fff;" onclick="openWithdrawModal()">Вывести 📤</button>
+                </div>
                 <div class="profile-stats">
                     <div class="stat-box">
                         <div class="stat-value" id="invCount">0</div>
@@ -696,18 +704,33 @@
         </button>
     </div>
 
-    <!-- Deposit Modal (Popup Message) -->
+    <!-- Deposit Modal -->
     <div class="modal-overlay" id="depositModal" onclick="closeModal('depositModal', event)">
         <div class="modal" onclick="event.stopPropagation()">
             <h3>Пополнение баланса ⭐</h3>
             <p>Отправьте звёзды на наш аккаунт <strong style="color:var(--accent);">@media</strong> и обязательно укажите ваш игровой ID:</p>
             <div style="background:#0f111a; padding:10px; border-radius:10px; text-align:center; border:1px solid var(--card-border); cursor:pointer;" onclick="copyDepositId()">
-                <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID (нажмите, чтобы скопировать):</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID (нажмите для копирования):</div>
                 <div id="modalUserId" style="font-size:16px; font-weight:800; color:var(--accent);">000000</div>
             </div>
             <p style="font-size:11px; color:var(--text-muted);">В сообщении к переводу напишите: <b>«Пополнение в боте [Ваш ID]»</b>.</p>
             <button class="btn" onclick="copyUsernameAndId()">Скопировать @media 📋</button>
-            <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('depositModal')">Понятно</button>
+            <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('depositModal')">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal-overlay" id="withdrawModal" onclick="closeModal('withdrawModal', event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Вывод средств 📤</h3>
+            <p>Чтобы вывести звёзды, напишите администратору <strong style="color:var(--accent);">@media</strong> в Telegram.</p>
+            <div style="background:#0f111a; padding:10px; border-radius:10px; text-align:center; border:1px solid var(--card-border);">
+                <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID:</div>
+                <div id="withdrawUserId" style="font-size:16px; font-weight:800; color:var(--accent);">000000</div>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted);">Укажите ваш ID и сумму вывода в сообщении.</p>
+            <button class="btn" onclick="copyWithdrawInfo()">Скопировать @media 📋</button>
+            <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('withdrawModal')">Закрыть</button>
         </div>
     </div>
 
@@ -749,7 +772,7 @@
         }
 
         let state = {
-            balance: 50, // Начальный баланс 50 звёзд
+            balance: 50, // Стартовый баланс 50 звёзд
             user: {
                 name: tg?.initDataUnsafe?.user?.first_name || "Player",
                 username: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : "",
@@ -790,7 +813,8 @@
             }
             updateUI();
             
-            // Синхронизируем с Firebase и при первом запуске автоматически записываем игрока в базу
+            // Принудительно сохраняем и синхронизируем пользователя с Firebase при старте
+            await saveGameToCloud();
             await syncBalanceFromCloud(true);
         }
 
@@ -803,7 +827,6 @@
                     state.balance = data.balance ?? 50;
                     state.inventory = data.inventory || [];
                 } else {
-                    // Если игрока еще нет в базе, создаем его с 50 звездами
                     await saveGameToCloud();
                 }
                 saveLocal();
@@ -847,6 +870,7 @@
             document.getElementById('profileName').innerText = `${state.user.name} ${state.user.username}`;
             document.getElementById('profileId').innerText = `ID: ${state.user.id}`;
             document.getElementById('modalUserId').innerText = state.user.id;
+            document.getElementById('withdrawUserId').innerText = state.user.id;
 
             renderShop();
             renderInventory();
@@ -901,6 +925,10 @@
             document.getElementById('depositModal').classList.add('open');
         }
 
+        function openWithdrawModal() {
+            document.getElementById('withdrawModal').classList.add('open');
+        }
+
         function copyDepositId() {
             navigator.clipboard?.writeText(state.user.id);
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -910,7 +938,13 @@
         function copyUsernameAndId() {
             navigator.clipboard?.writeText("@media");
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert("Юзернейм @media скопирован! Отправьте звёзды на этот аккаунт с указанием вашего ID.");
+            alert("Юзернейм @media скопирован!");
+        }
+
+        function copyWithdrawInfo() {
+            navigator.clipboard?.writeText("@media");
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            alert("Юзернейм @media скопирован! Напишите администратору для вывода.");
         }
 
         function copyUserId() {
