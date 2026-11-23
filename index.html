@@ -14,10 +14,6 @@
             --accent-glow: rgba(245, 158, 11, 0.3);
             --text-main: #ffffff;
             --text-muted: #94a3b8;
-            --rare: #3b82f6;
-            --epic: #a855f7;
-            --legendary: #eab308;
-            --common: #64748b;
             --success: #22c55e;
             --danger: #ef4444;
         }
@@ -259,7 +255,7 @@
             cursor: not-allowed;
         }
 
-        /* Upgrade Section with Spinning Needle */
+        /* Upgrade Section */
         .upgrade-container {
             display: flex;
             flex-direction: column;
@@ -321,7 +317,7 @@
             border-color: var(--accent);
         }
 
-        /* Fixed Wheel & Needle Container */
+        /* Wheel & Needle Container */
         .wheel-container {
             position: relative;
             width: 180px;
@@ -333,7 +329,8 @@
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            background: conic-gradient(#22c55e 0deg 216deg, #ef4444 216deg 360deg);
+            /* Динамический градиент управляется через JS */
+            background: conic-gradient(var(--success) 0deg 216deg, var(--danger) 216deg 360deg);
             position: absolute;
             top: 0; left: 0;
             box-shadow: 0 0 15px rgba(0,0,0,0.5);
@@ -685,17 +682,17 @@
                     <div style="width: 100%;">
                         <div style="font-size: 13px; color:var(--text-muted); margin-bottom: 6px; text-align: center;">Множитель выигрыша</div>
                         <div class="multiplier-selector">
-                            <button class="mult-btn active" onclick="setMultiplier(1.5, this)">x1.5 (60%)</button>
-                            <button class="mult-btn" onclick="setMultiplier(2.0, this)">x2.0 (45%)</button>
-                            <button class="mult-btn" onclick="setMultiplier(3.0, this)">x3.0 (30%)</button>
-                            <button class="mult-btn" onclick="setMultiplier(5.0, this)">x5.0 (18%)</button>
+                            <button class="mult-btn active" onclick="setMultiplier(1.5, 60, this)">x1.5 (60%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(2.0, 45, this)">x2.0 (45%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(3.0, 30, this)">x3.0 (30%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(5.0, 18, this)">x5.0 (18%)</button>
                         </div>
                     </div>
 
                     <!-- Wheel container with rotating needle -->
                     <div class="wheel-container">
                         <div class="wheel-needle" id="wheelNeedle" style="transform: rotate(0deg);"></div>
-                        <div class="wheel-box">
+                        <div class="wheel-box" id="wheelBox">
                             <div class="wheel-inner">
                                 <span id="chanceDisplay" style="font-size: 18px; color: var(--accent);">60%</span>
                                 <span style="font-size: 10px; color: var(--text-muted);">ШАНС</span>
@@ -801,13 +798,12 @@
     <div class="modal-overlay" id="withdrawModal" onclick="closeModal('withdrawModal', event)">
         <div class="modal" onclick="event.stopPropagation()">
             <h3>Вывод средств 📤</h3>
-            <p>Чтобы вывести звёзды, напишите администратору <strong style="color:var(--accent);">@media</strong> в Telegram.</p>
+            <p>Нажмите кнопку ниже, чтобы отправить заявку на вывод прямо вашему Telegram-боту:</p>
             <div style="background:#0f111a; padding:10px; border-radius:10px; text-align:center; border:1px solid var(--card-border);">
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID:</div>
                 <div id="withdrawUserId" style="font-size:16px; font-weight:800; color:var(--accent);">000000</div>
             </div>
-            <p style="font-size:11px; color:var(--text-muted);">Укажите ваш ID и сумму вывода в сообщении администратору.</p>
-            <button class="btn" onclick="copyWithdrawInfo()">Скопировать @media 📋</button>
+            <button class="btn" onclick="requestWithdrawBot()">Отправить заявку боту 🚀</button>
             <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('withdrawModal')">Закрыть</button>
         </div>
     </div>
@@ -911,6 +907,8 @@
             }
             saveLocal();
             updateUI();
+            // Устанавливаем правильный начальный градиент круга для 60%
+            updateWheelGradient(60);
         }
 
         function saveLocal() {
@@ -990,7 +988,7 @@
             invValue.innerText = `${totalVal} ⭐`;
 
             if (state.inventory.length === 0) {
-                grid.innerHTML = `<div class="empty-inventory">Инвентарь пуст.<br>Пополните баланс через @media и купите предметы!</div>`;
+                grid.innerHTML = `<div class="empty-inventory">Инвентарь пуст.<br>Пополните баланс и купите предметы в магазине!</div>`;
                 return;
             }
 
@@ -1016,6 +1014,22 @@
             document.getElementById('withdrawModal').classList.add('open');
         }
 
+        // Отправка запроса на вывод боту через tg.sendData
+        function requestWithdrawBot() {
+            if (tg && tg.sendData) {
+                let payload = JSON.stringify({
+                    action: "withdraw",
+                    user_id: state.user.id,
+                    username: state.user.username,
+                    name: state.user.name,
+                    balance: state.balance
+                });
+                tg.sendData(payload); // Передает данные боту и закрывает Web App
+            } else {
+                alert("Запрос сформирован! (Вне Telegram отправка через sendData недоступна).");
+            }
+        }
+
         function copyDepositId() {
             navigator.clipboard?.writeText(state.user.id);
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1026,12 +1040,6 @@
             navigator.clipboard?.writeText("@media");
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             alert("Юзернейм @media скопирован!");
-        }
-
-        function copyWithdrawInfo() {
-            navigator.clipboard?.writeText("@media");
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert("Юзернейм @media скопирован! Напишите администратору для вывода.");
         }
 
         function copyUserId() {
@@ -1205,16 +1213,26 @@
             adminAddStars(targetId, amount);
         }
 
-        // ================= АПГРЕЙД (С фиксированным стартом стрелки) =================
-        function setMultiplier(mult, btn) {
+        // ================= АПГРЕЙД И ИСПРАВЛЕНИЕ ГРАДИЕНТА КРУГА =================
+        function updateWheelGradient(chance) {
+            const wheelBox = document.getElementById('wheelBox');
+            // Переводим проценты шанса в градусы (1% = 3.6 градуса)
+            const deg = chance * 3.6;
+            // Зеленый сектор идет от 0deg до рассчитанных градусов, красный — дальше до 360deg
+            wheelBox.style.background = `conic-gradient(var(--success) 0deg ${deg}deg, var(--danger) ${deg}deg 360deg)`;
+        }
+
+        function setMultiplier(mult, chance, btn) {
             state.multiplier = mult;
-            state.chance = Math.round(60 / mult);
-            if (state.chance < 5) state.chance = 5;
+            state.chance = chance;
 
             document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
             document.getElementById('chanceDisplay').innerText = `${state.chance}%`;
+            
+            // Обновляем зеленую линию под новый процент
+            updateWheelGradient(state.chance);
         }
 
         function openSelectModal() {
@@ -1268,12 +1286,13 @@
             needle.style.transition = 'none';
             needle.style.transform = 'rotate(0deg)';
 
-            // 2. Небольшая пауза перед запуском плавной анимации вращения
+            // 2. Запуск плавной анимации вращения стрелки
             setTimeout(() => {
                 const success = Math.random() * 100 < state.chance;
 
-                // Зеленый сектор: 20° - 190°, Красный сектор: 230° - 330°
-                const targetDeg = success ? (20 + Math.random() * 170) : (230 + Math.random() * 100);
+                // Зеленая зона находится в пределах выбранного процента (0° до chance * 3.6°), красный — остальное
+                const greenEndDeg = state.chance * 3.6;
+                const targetDeg = success ? (10 + Math.random() * (greenEndDeg - 20)) : (greenEndDeg + 10 + Math.random() * (350 - greenEndDeg));
                 const totalRot = 1440 + targetDeg; // 4 полных оборота + целевой угол
 
                 // Включаем плавную анимацию
