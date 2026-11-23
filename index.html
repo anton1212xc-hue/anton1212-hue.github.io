@@ -142,6 +142,43 @@
             font-weight: 700;
         }
 
+        /* Sub-tabs for Games Section */
+        .subtabs-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: var(--card-bg);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .subtab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subtab-btn.active {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
         /* Shop Grid */
         .shop-grid {
             display: grid;
@@ -222,12 +259,12 @@
             cursor: not-allowed;
         }
 
-        /* Upgrade Section */
+        /* Upgrade Section with Spinning Needle */
         .upgrade-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
             max-width: 360px;
             margin: 0 auto;
         }
@@ -244,7 +281,7 @@
             background: var(--card-bg);
             border: 2px dashed var(--card-border);
             border-radius: 16px;
-            height: 130px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -261,7 +298,7 @@
 
         .multiplier-selector {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
             justify-content: center;
         }
@@ -270,7 +307,7 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 6px;
+            padding: 8px 4px;
             border-radius: 10px;
             font-weight: 700;
             font-size: 12px;
@@ -284,22 +321,30 @@
             border-color: var(--accent);
         }
 
+        /* Fixed Wheel & Needle Container */
+        .wheel-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 10px auto;
+        }
+
         .wheel-box {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
             background: conic-gradient(#22c55e 0deg 216deg, #ef4444 216deg 360deg);
-            position: relative;
+            position: absolute;
+            top: 0; left: 0;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            transition: transform 3s cubic-bezier(0.15, 0.85, 0.15, 1);
         }
 
         .wheel-inner {
-            width: 140px;
-            height: 140px;
+            width: 120px;
+            height: 120px;
             background: var(--card-bg);
             border-radius: 50%;
             display: flex;
@@ -307,17 +352,32 @@
             align-items: center;
             justify-content: center;
             font-weight: 800;
+            z-index: 2;
         }
 
-        .wheel-pointer {
+        /* Rotating Needle */
+        .wheel-needle {
             position: absolute;
-            top: -10px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 20px solid var(--accent);
-            z-index: 5;
+            top: -15px;
+            left: calc(50% - 6px);
+            width: 12px;
+            height: 100px;
+            background: transparent;
+            z-index: 10;
+            transform-origin: bottom center;
+            transform: rotate(0deg);
+            transition: transform 3s cubic-bezier(0.15, 0.85, 0.15, 1);
+        }
+
+        .wheel-needle::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 22px solid #fff;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
         /* Profile & Inventory */
@@ -498,12 +558,12 @@
             color: var(--accent);
         }
 
-        .nav-item.center-upgrade {
+        .nav-item.center-games {
             position: relative;
             top: -12px;
         }
 
-        .nav-item.center-upgrade .upgrade-circle {
+        .nav-item.center-games .games-circle {
             width: 54px;
             height: 54px;
             background: var(--accent);
@@ -515,7 +575,7 @@
             color: #000;
         }
 
-        .nav-item.center-upgrade svg {
+        .nav-item.center-games svg {
             fill: #000;
             width: 26px;
             height: 26px;
@@ -606,38 +666,53 @@
             <div class="shop-grid" id="shopGrid"></div>
         </div>
 
-        <!-- UPGRADE TAB -->
-        <div id="tab-upgrade" class="tab-content">
-            <h2>Апгрейд предметов</h2>
-            <div class="upgrade-container">
-                <div class="upgrade-slots">
-                    <div class="slot" id="slotSource" onclick="openSelectModal()">
-                        <div class="item-icon">➕</div>
-                        <div style="font-size:12px; color:var(--text-muted)">Выберите предмет</div>
-                    </div>
-                </div>
+        <!-- GAMES TAB (Center) -->
+        <div id="tab-games" class="tab-content">
+            <div class="subtabs-header">
+                <button class="subtab-btn active" onclick="switchSubTab('upgrade', this)">🎲 Апгрейд</button>
+                <button class="subtab-btn" onclick="switchSubTab('cases', this)">🎁 Кейсы (Скоро)</button>
+            </div>
 
-                <div style="width: 100%;">
-                    <div style="font-size: 13px; color:var(--text-muted); margin-bottom: 6px; text-align: center;">Множитель выигрыша</div>
-                    <div class="multiplier-selector">
-                        <button class="mult-btn active" onclick="setMultiplier(1.5, this)">x1.5 (60%)</button>
-                        <button class="mult-btn" onclick="setMultiplier(2.0, this)">x2.0 (45%)</button>
-                        <button class="mult-btn" onclick="setMultiplier(3.0, this)">x3.0 (30%)</button>
-                        <button class="mult-btn" onclick="setMultiplier(5.0, this)">x5.0 (18%)</button>
-                    </div>
-                </div>
-
-                <div style="position: relative;">
-                    <div class="wheel-pointer"></div>
-                    <div class="wheel-box" id="upgradeWheel" style="transform: rotate(0deg);">
-                        <div class="wheel-inner">
-                            <span id="chanceDisplay" style="font-size: 18px; color: var(--accent);">60%</span>
-                            <span style="font-size: 10px; color: var(--text-muted);">ШАНС</span>
+            <!-- SubTab: Upgrade -->
+            <div id="subtab-upgrade" class="subtab-content active">
+                <div class="upgrade-container">
+                    <div class="upgrade-slots">
+                        <div class="slot" id="slotSource" onclick="openSelectModal()">
+                            <div class="item-icon">➕</div>
+                            <div style="font-size:12px; color:var(--text-muted)">Выберите предмет</div>
                         </div>
                     </div>
-                </div>
 
-                <button class="btn" id="startUpgradeBtn" onclick="startUpgrade()" style="padding: 12px; font-size: 15px;" disabled>СДЕЛАТЬ АПГРЕЙД</button>
+                    <div style="width: 100%;">
+                        <div style="font-size: 13px; color:var(--text-muted); margin-bottom: 6px; text-align: center;">Множитель выигрыша</div>
+                        <div class="multiplier-selector">
+                            <button class="mult-btn active" onclick="setMultiplier(1.5, this)">x1.5 (60%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(2.0, this)">x2.0 (45%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(3.0, this)">x3.0 (30%)</button>
+                            <button class="mult-btn" onclick="setMultiplier(5.0, this)">x5.0 (18%)</button>
+                        </div>
+                    </div>
+
+                    <!-- Wheel container with rotating needle -->
+                    <div class="wheel-container">
+                        <div class="wheel-needle" id="wheelNeedle" style="transform: rotate(0deg);"></div>
+                        <div class="wheel-box">
+                            <div class="wheel-inner">
+                                <span id="chanceDisplay" style="font-size: 18px; color: var(--accent);">60%</span>
+                                <span style="font-size: 10px; color: var(--text-muted);">ШАНС</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="startUpgradeBtn" onclick="startUpgrade()" style="padding: 12px; font-size: 15px;" disabled>СДЕЛАТЬ АПГРЕЙД</button>
+                </div>
+            </div>
+
+            <!-- SubTab: Cases Placeholder -->
+            <div id="subtab-cases" class="subtab-content">
+                <div style="text-align:center; padding:50px 20px; color:var(--text-muted);">
+                    <h3>Скоро здесь появятся новые игры! 🚀</h3>
+                </div>
             </div>
         </div>
 
@@ -646,9 +721,12 @@
             <h2>Профиль и Инвентарь</h2>
             <div class="profile-header">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span id="profileName" style="font-weight:700; font-size: 16px;">Player</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span id="profileName" style="font-weight:700; font-size: 16px;">Player</span>
+                        <button class="admin-mini-btn" style="padding:3px 6px; font-size:11px;" onclick="changeName()">Изменить ✏️</button>
+                    </div>
                     <div class="id-badge" onclick="copyUserId()">
-                        <span id="profileId">ID: 000000</span> 📋
+                        <span id="profileId">ID: 000003</span> 📋
                     </div>
                 </div>
                 <div class="profile-buttons">
@@ -693,10 +771,11 @@
             <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
             Магазин
         </button>
-        <button class="nav-item center-upgrade" onclick="switchTab('upgrade', this)">
-            <div class="upgrade-circle">
-                <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+        <button class="nav-item center-games" onclick="switchTab('games', this)">
+            <div class="games-circle">
+                <svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-4c-.83 0-1.5-.67-1.5-1.5S19.67 8 20.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
             </div>
+            Игры
         </button>
         <button class="nav-item" onclick="switchTab('profile', this)">
             <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -728,7 +807,7 @@
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID:</div>
                 <div id="withdrawUserId" style="font-size:16px; font-weight:800; color:var(--accent);">000000</div>
             </div>
-            <p style="font-size:11px; color:var(--text-muted);">Укажите ваш ID и сумму вывода в сообщении.</p>
+            <p style="font-size:11px; color:var(--text-muted);">Укажите ваш ID и сумму вывода в сообщении администратору.</p>
             <button class="btn" onclick="copyWithdrawInfo()">Скопировать @media 📋</button>
             <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('withdrawModal')">Закрыть</button>
         </div>
@@ -771,10 +850,13 @@
             localStorage.setItem('browser_test_id', defaultId);
         }
 
+        let savedName = localStorage.getItem('player_custom_name');
+        let defaultName = savedName || tg?.initDataUnsafe?.user?.first_name || "Player";
+
         let state = {
-            balance: 50, // Стартовый баланс 50 звёзд
+            balance: 50,
             user: {
-                name: tg?.initDataUnsafe?.user?.first_name || "Player",
+                name: defaultName,
                 username: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : "",
                 id: (tg?.initDataUnsafe?.user?.id || defaultId).toString()
             },
@@ -812,8 +894,6 @@
                 } catch(e) {}
             }
             updateUI();
-            
-            // Принудительно сохраняем и синхронизируем пользователя с Firebase при старте
             await saveGameToCloud();
             await syncBalanceFromCloud(true);
         }
@@ -826,6 +906,9 @@
                 if (data) {
                     state.balance = data.balance ?? 50;
                     state.inventory = data.inventory || [];
+                    if (data.name && !localStorage.getItem('player_custom_name')) {
+                        state.user.name = data.name;
+                    }
                 } else {
                     await saveGameToCloud();
                 }
@@ -867,13 +950,24 @@
             document.getElementById('userBalance').innerText = state.balance;
             document.getElementById('userName').innerText = state.user.name;
             document.getElementById('userAvatar').innerText = state.user.name.charAt(0).toUpperCase();
-            document.getElementById('profileName').innerText = `${state.user.name} ${state.user.username}`;
+            document.getElementById('profileName').innerText = state.user.name;
             document.getElementById('profileId').innerText = `ID: ${state.user.id}`;
             document.getElementById('modalUserId').innerText = state.user.id;
             document.getElementById('withdrawUserId').innerText = state.user.id;
 
             renderShop();
             renderInventory();
+        }
+
+        function changeName() {
+            const newName = prompt("Введите ваше новое имя:", state.user.name);
+            if (newName && newName.trim().length > 0) {
+                state.user.name = newName.trim();
+                localStorage.setItem('player_custom_name', state.user.name);
+                updateUI();
+                saveGameToCloud();
+                alert("Имя успешно изменено!");
+            }
         }
 
         function renderShop() {
@@ -973,6 +1067,7 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
+        // Navigation Tabs
         function switchTab(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -983,6 +1078,15 @@
             if (tabName === 'profile' && state.isAdmin) {
                 loadAdminUsers();
             }
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        function switchSubTab(subTabName, element) {
+            document.querySelectorAll('.subtab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.subtab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`subtab-${subTabName}`).classList.add('active');
+            element.classList.add('active');
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
@@ -1108,7 +1212,7 @@
             adminAddStars(targetId, amount);
         }
 
-        // ================= АПГРЕЙД =================
+        // ================= АПГРЕЙД (С вращающейся стрелкой) =================
         function setMultiplier(mult, btn) {
             state.multiplier = mult;
             state.chance = Math.round(60 / mult);
@@ -1118,15 +1222,11 @@
             btn.classList.add('active');
 
             document.getElementById('chanceDisplay').innerText = `${state.chance}%`;
-            
-            const wheel = document.getElementById('upgradeWheel');
-            const deg = (state.chance / 100) * 360;
-            wheel.style.background = `conic-gradient(#22c55e 0deg ${deg}deg, #ef4444 ${deg}deg 360deg)`;
         }
 
         function openSelectModal() {
             if (state.inventory.length === 0) {
-                alert("Инвентарь пуст!");
+                alert("Инвентарь пуст! Купите предмет в магазине.");
                 return;
             }
             const list = document.getElementById('modalItemsList');
@@ -1169,12 +1269,16 @@
             if (!state.selectedItem) return;
             document.getElementById('startUpgradeBtn').disabled = true;
 
-            const wheel = document.getElementById('upgradeWheel');
-            const randomRot = 1440 + Math.floor(Math.random() * 360);
-            wheel.style.transform = `rotate(${randomRot}deg)`;
+            const needle = document.getElementById('wheelNeedle');
+            const success = Math.random() * 100 < state.chance;
+
+            // Зеленый сектор: 0 - 216 градусов (60%), Красный: 216 - 360 градусов
+            const targetDeg = success ? (20 + Math.random() * 170) : (236 + Math.random() * 100);
+            const totalRot = 1440 + targetDeg; // Несколько полных оборотов + целевой угол
+
+            needle.style.transform = `rotate(${totalRot}deg)`;
 
             setTimeout(async () => {
-                const success = Math.random() * 100 < state.chance;
                 if (success) {
                     const newPrice = Math.round(state.selectedItem.price * state.multiplier);
                     state.selectedItem.price = newPrice;
@@ -1184,7 +1288,7 @@
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 } else {
                     state.inventory.splice(state.selectedItemIndex, 1);
-                    alert("Апгрейд не удался. Предмет сгорел.");
+                    alert("К сожалению, апгрейд не удался. Предмет сгорел.");
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 }
 
