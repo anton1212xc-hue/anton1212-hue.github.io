@@ -18,6 +18,8 @@
             --epic: #a855f7;
             --legendary: #eab308;
             --common: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
         }
 
         * {
@@ -45,7 +47,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 14px 16px;
-            background: rgba(24, 27, 40, 0.8);
+            background: rgba(24, 27, 40, 0.85);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--card-border);
             z-index: 10;
@@ -89,7 +91,7 @@
         }
 
         .balance-card span {
-            font-size: 18px;
+            font-size: 17px;
         }
 
         .add-stars {
@@ -117,7 +119,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            padding-bottom: 90px;
+            padding-bottom: 95px;
         }
 
         .tab-content {
@@ -157,7 +159,6 @@
             align-items: center;
             text-align: center;
             position: relative;
-            transition: border-color 0.2s;
         }
 
         .item-card.rare { border-color: rgba(59, 130, 246, 0.4); }
@@ -201,12 +202,15 @@
             color: #000;
             border: none;
             width: 100%;
-            padding: 8px;
+            padding: 9px;
             border-radius: 10px;
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
             transition: opacity 0.1s, transform 0.1s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
 
         .btn:active {
@@ -250,7 +254,6 @@
             cursor: pointer;
             padding: 10px;
             text-align: center;
-            position: relative;
         }
 
         .slot.filled {
@@ -269,13 +272,12 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 12px;
+            padding: 8px 6px;
             border-radius: 10px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             flex: 1;
-            transition: all 0.2s;
         }
 
         .mult-btn.active {
@@ -329,14 +331,25 @@
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .id-badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
         }
 
         .profile-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-top: 8px;
         }
 
         .stat-box {
@@ -366,9 +379,77 @@
         .empty-inventory {
             grid-column: span 2;
             text-align: center;
-            padding: 40px;
+            padding: 40px 20px;
             color: var(--text-muted);
             font-size: 14px;
+        }
+
+        /* Admin Panel Inside Profile */
+        .admin-section {
+            display: none;
+            margin-top: 20px;
+            border-top: 1px solid var(--card-border);
+            padding-top: 16px;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .admin-mini-btn {
+            flex: 1;
+            padding: 7px 4px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .admin-mini-btn:active {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #0f111a;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            user-select: text;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
         }
 
         /* Bottom Navigation Bar */
@@ -402,7 +483,6 @@
             cursor: pointer;
             flex: 1;
             height: 100%;
-            transition: color 0.2s;
         }
 
         .nav-item svg {
@@ -430,12 +510,6 @@
             justify-content: center;
             box-shadow: 0 4px 15px var(--accent-glow);
             color: #000;
-            transition: transform 0.1s;
-        }
-
-        .nav-item.center-upgrade.active .upgrade-circle {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px var(--accent-glow);
         }
 
         .nav-item.center-upgrade svg {
@@ -444,11 +518,11 @@
             height: 26px;
         }
 
-        /* Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(5px);
             display: flex;
             align-items: center;
@@ -468,16 +542,23 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             width: 90%;
-            max-width: 320px;
+            max-width: 340px;
             border-radius: 20px;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
         .modal h3 {
-            font-size: 16px;
+            font-size: 17px;
+            text-align: center;
+        }
+
+        .modal p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.45;
             text-align: center;
         }
 
@@ -497,11 +578,6 @@
             padding: 8px 12px;
             border-radius: 10px;
             cursor: pointer;
-            transition: background 0.1s;
-        }
-
-        .modal-item-row:active {
-            background: rgba(255,255,255,0.08);
         }
     </style>
 </head>
@@ -514,8 +590,8 @@
             <div class="username" id="userName">Player</div>
         </div>
         <div class="balance-card">
-            ⭐ <span id="userBalance">500</span>
-            <button class="add-stars" onclick="addStars()">+</button>
+            ⭐ <span id="userBalance">0</span>
+            <button class="add-stars" onclick="openDepositLink()">+</button>
         </div>
     </div>
 
@@ -524,9 +600,7 @@
         <!-- SHOP TAB -->
         <div id="tab-shop" class="tab-content active">
             <h2>Магазин предметов</h2>
-            <div class="shop-grid" id="shopGrid">
-                <!-- Dynamically filled -->
-            </div>
+            <div class="shop-grid" id="shopGrid"></div>
         </div>
 
         <!-- UPGRADE TAB -->
@@ -570,8 +644,11 @@
             <div class="profile-header">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span id="profileName" style="font-weight:700; font-size: 16px;">Player</span>
-                    <span id="profileId" style="font-size:12px; color:var(--text-muted);">ID: 000000</span>
+                    <div class="id-badge" onclick="copyUserId()">
+                        <span id="profileId">ID: 000000</span> 📋
+                    </div>
                 </div>
+                <a class="btn" href="https://t.me/media" target="_blank" onclick="openDepositLink()">Пополнить баланс ⭐ (@media)</a>
                 <div class="profile-stats">
                     <div class="stat-box">
                         <div class="stat-value" id="invCount">0</div>
@@ -582,12 +659,25 @@
                         <div class="stat-label">Ценность</div>
                     </div>
                 </div>
+                
+                <!-- Secret button to open Admin Login -->
+                <button class="admin-mini-btn" style="margin-top: 6px; background:transparent; border-color:var(--card-border); color:var(--text-muted);" onclick="openAdminModal()">🔑 Войти в админ-панель</button>
             </div>
 
-            <h3 style="font-size: 16px; margin-bottom: 10px;">Инвентарь</h3>
-            <div class="inventory-grid" id="inventoryGrid">
-                <!-- Dynamically filled -->
+            <!-- ADMIN PANEL (Inside Profile) -->
+            <div class="admin-section" id="adminSection">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="margin:0; color:var(--accent); font-size:16px;">👑 Админ-панель</h3>
+                    <button class="admin-mini-btn" style="flex:none; padding:5px 10px;" onclick="loadAdminUsers()">Обновить 🔄</button>
+                </div>
+                <input type="text" id="adminSearchInput" class="input-field" placeholder="Поиск по ID или имени..." oninput="renderAdminUsers()" style="margin-bottom:12px;">
+                <div id="adminUsersList">
+                    <div style="text-align:center; color:var(--text-muted); padding:15px;">Нажмите «Обновить», чтобы загрузить игроков.</div>
+                </div>
             </div>
+
+            <h3 style="font-size: 16px; margin: 16px 0 10px 0;">Инвентарь</h3>
+            <div class="inventory-grid" id="inventoryGrid"></div>
         </div>
     </div>
 
@@ -608,39 +698,59 @@
         </button>
     </div>
 
-    <!-- Select Item Modal -->
-    <div class="modal-overlay" id="selectModal" onclick="closeSelectModal(event)">
+    <!-- Admin Password Modal -->
+    <div class="modal-overlay" id="adminLoginModal" onclick="closeModal('adminLoginModal', event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Вход в Админ-панель 🔒</h3>
+            <p>Введите пароль администратора:</p>
+            <input type="password" id="adminPassInput" class="input-field" placeholder="Пароль...">
+            <button class="btn" onclick="checkAdminPassword()">Войти</button>
+            <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('adminLoginModal')">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Select Item Modal (Upgrade) -->
+    <div class="modal-overlay" id="selectModal" onclick="closeModal('selectModal', event)">
         <div class="modal" onclick="event.stopPropagation()">
             <h3>Выберите предмет для апгрейда</h3>
-            <div class="modal-items-list" id="modalItemsList">
-                <!-- Dynamically filled -->
-            </div>
+            <div class="modal-items-list" id="modalItemsList"></div>
         </div>
     </div>
 
     <script>
-        // Telegram WebApp Initialization
+        // ================= НАСТРОЙКИ =================
+        const FIREBASE_URL = "https://ВАШ-ПРОЕКТ-default-rtdb.firebaseio.com"; // Замените на свою ссылку Firebase
+        const ADMIN_PASSWORD = "gver1212";
+        // =============================================
+
         let tg = window.Telegram?.WebApp;
         if (tg) {
             tg.expand();
             tg.ready();
         }
 
-        // Game State
+        let defaultId = localStorage.getItem('browser_test_id');
+        if (!defaultId) {
+            defaultId = Math.floor(100000 + Math.random() * 900000).toString();
+            localStorage.setItem('browser_test_id', defaultId);
+        }
+
         let state = {
-            balance: 500,
+            balance: 0,
             user: {
                 name: tg?.initDataUnsafe?.user?.first_name || "Player",
-                id: tg?.initDataUnsafe?.user?.id || 12345678,
-                username: tg?.initDataUnsafe?.user?.username || "player"
+                username: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : "",
+                id: (tg?.initDataUnsafe?.user?.id || defaultId).toString()
             },
             inventory: [],
             selectedItem: null,
+            selectedItemIndex: null,
             multiplier: 1.5,
-            chance: 60
+            chance: 60,
+            isAdmin: false,
+            allUsers: {}
         };
 
-        // Shop Catalog
         const shopItems = [
             { id: 1, name: "Кепка Cyber", price: 50, rarity: "common", icon: "🧢" },
             { id: 2, name: "Очки Neon", price: 120, rarity: "common", icon: "🕶️" },
@@ -652,34 +762,73 @@
             { id: 8, name: "Ноутбук Cyber", price: 5000, rarity: "legendary", icon: "💻" }
         ];
 
-        // Load saved state if exists
-        function loadGame() {
-            const saved = localStorage.getItem('stardrop_state');
+        function isFirebaseConfigured() {
+            return FIREBASE_URL && !FIREBASE_URL.includes("ВАШ-ПРОЕКТ");
+        }
+
+        async function loadGame() {
+            const saved = localStorage.getItem(`stardrop_${state.user.id}`);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    state.balance = parsed.balance ?? 500;
+                    state.balance = parsed.balance ?? 0;
                     state.inventory = parsed.inventory ?? [];
-                } catch(e) {
-                    console.error("Load error", e);
-                }
+                } catch(e) {}
             }
             updateUI();
+            await syncBalanceFromCloud(true);
         }
 
-        function saveGame() {
-            localStorage.setItem('stardrop_state', JSON.stringify({
+        async function syncBalanceFromCloud(silent = false) {
+            if (!isFirebaseConfigured()) return;
+            try {
+                const res = await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`);
+                const data = await res.json();
+                if (data) {
+                    state.balance = data.balance ?? 0;
+                    state.inventory = data.inventory || [];
+                } else {
+                    await saveGameToCloud();
+                }
+                saveLocal();
+                updateUI();
+                if (!silent) alert("Баланс обновлен!");
+            } catch (err) {
+                console.error("Ошибка Firebase:", err);
+            }
+        }
+
+        function saveLocal() {
+            localStorage.setItem(`stardrop_${state.user.id}`, JSON.stringify({
                 balance: state.balance,
                 inventory: state.inventory
             }));
         }
 
-        // UI Updates
+        async function saveGameToCloud() {
+            saveLocal();
+            if (!isFirebaseConfigured()) return;
+            try {
+                await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: state.user.id,
+                        name: state.user.name,
+                        username: state.user.username,
+                        balance: state.balance,
+                        inventory: state.inventory,
+                        lastSeen: Date.now()
+                    })
+                });
+            } catch (err) {}
+        }
+
         function updateUI() {
             document.getElementById('userBalance').innerText = state.balance;
             document.getElementById('userName').innerText = state.user.name;
             document.getElementById('userAvatar').innerText = state.user.name.charAt(0).toUpperCase();
-            document.getElementById('profileName').innerText = state.user.name;
+            document.getElementById('profileName').innerText = `${state.user.name} ${state.user.username}`;
             document.getElementById('profileId').innerText = `ID: ${state.user.id}`;
 
             renderShop();
@@ -709,12 +858,11 @@
             const invValue = document.getElementById('invValue');
 
             invCount.innerText = state.inventory.length;
-            
             let totalVal = state.inventory.reduce((sum, item) => sum + item.price, 0);
             invValue.innerText = `${totalVal} ⭐`;
 
             if (state.inventory.length === 0) {
-                grid.innerHTML = `<div class="empty-inventory">Инвентарь пуст. Купите предметы в магазине!</div>`;
+                grid.innerHTML = `<div class="empty-inventory">Инвентарь пуст.<br>Пополните баланс ⭐ через @media и купите предметы!</div>`;
                 return;
             }
 
@@ -726,41 +874,46 @@
                     <div class="item-icon">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price">⭐ ${item.price}</div>
-                    <button class="btn" style="background:#ef4444; color:#fff;" onclick="sellItem(${index})">Продать</button>
+                    <button class="btn" style="background:#ef4444; color:#fff;" onclick="sellItem(${index})">Продать (${Math.floor(item.price * 0.8)} ⭐)</button>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Actions
-        function addStars() {
-            state.balance += 100;
-            saveGame();
-            updateUI();
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        function openDepositLink() {
+            if (tg?.openTelegramLink) {
+                tg.openTelegramLink("https://t.me/media");
+            } else {
+                window.open("https://t.me/media", "_blank");
+            }
         }
 
-        function buyItem(id) {
+        function copyUserId() {
+            navigator.clipboard?.writeText(state.user.id);
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            alert(`Ваш ID (${state.user.id}) скопирован! Отправьте его администратору.`);
+        }
+
+        async function buyItem(id) {
             const item = shopItems.find(i => i.id === id);
             if (!item || state.balance < item.price) return;
 
             state.balance -= item.price;
             state.inventory.push({ ...item, uniqueId: Date.now() + Math.random() });
-            saveGame();
             updateUI();
+            await saveGameToCloud();
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
 
-        function sellItem(index) {
+        async function sellItem(index) {
             const item = state.inventory[index];
-            state.balance += Math.floor(item.price * 0.8); // 80% price return
+            state.balance += Math.floor(item.price * 0.8);
             state.inventory.splice(index, 1);
-            saveGame();
             updateUI();
+            await saveGameToCloud();
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        // Navigation Tabs
         function switchTab(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -768,10 +921,136 @@
             document.getElementById(`tab-${tabName}`).classList.add('active');
             element.classList.add('active');
 
+            if (tabName === 'profile' && state.isAdmin) {
+                loadAdminUsers();
+            }
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
-        // Upgrade Logic
+        function closeModal(modalId, e) {
+            if (!e || e.target.id === modalId) {
+                document.getElementById(modalId).classList.remove('open');
+            }
+        }
+
+        // ================= АДМИН-ПАНЕЛЬ =================
+        function openAdminModal() {
+            if (state.isAdmin) {
+                // Если уже авторизован, просто прокрутим или обновим
+                loadAdminUsers();
+                return;
+            }
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminLoginModal').classList.add('open');
+        }
+
+        function checkAdminPassword() {
+            const entered = document.getElementById('adminPassInput').value;
+            if (entered === ADMIN_PASSWORD) {
+                state.isAdmin = true;
+                closeModal('adminLoginModal');
+                document.getElementById('adminSection').classList.add('active');
+                loadAdminUsers();
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } else {
+                alert("Неверный пароль!");
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            }
+        }
+
+        async function loadAdminUsers() {
+            const container = document.getElementById('adminUsersList');
+            if (!isFirebaseConfigured()) {
+                container.innerHTML = `<div style="color:var(--danger); text-align:center;">Подключите Firebase в коде (FIREBASE_URL)!</div>`;
+                return;
+            }
+            container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:15px;">Загрузка игроков...</div>`;
+            try {
+                const res = await fetch(`${FIREBASE_URL}/users.json`);
+                state.allUsers = (await res.json()) || {};
+                renderAdminUsers();
+            } catch (err) {
+                container.innerHTML = `<div style="color:var(--danger); text-align:center;">Ошибка загрузки.</div>`;
+            }
+        }
+
+        function renderAdminUsers() {
+            const container = document.getElementById('adminUsersList');
+            const query = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+            const usersArray = Object.values(state.allUsers);
+
+            const filtered = usersArray.filter(u => 
+                (u.id && u.id.toString().includes(query)) || 
+                (u.name && u.name.toLowerCase().includes(query)) ||
+                (u.username && u.username.toLowerCase().includes(query))
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:15px;">Игроки не найдены.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            filtered.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'admin-card';
+                card.innerHTML = `
+                    <div class="admin-user-row">
+                        <div>
+                            <div style="font-weight:700; font-size:14px;">${user.name || 'Без имени'} <span style="color:var(--text-muted); font-size:12px;">${user.username || ''}</span></div>
+                            <div style="font-size:12px; color:var(--text-muted);">ID: ${user.id}</div>
+                        </div>
+                        <div style="font-weight:800; font-size:16px; color:var(--accent);">⭐ ${user.balance ?? 0}</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="admin-mini-btn" onclick="adminAddStars('${user.id}', 50)">+50 ⭐</button>
+                        <button class="admin-mini-btn" onclick="adminAddStars('${user.id}', 100)">+100 ⭐</button>
+                        <button class="admin-mini-btn" onclick="adminAddStars('${user.id}', 500)">+500 ⭐</button>
+                        <button class="admin-mini-btn" onclick="adminCustomStars('${user.id}')">Своё ✏️</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function adminAddStars(targetId, amount) {
+            const user = state.allUsers[targetId];
+            if (!user) return;
+
+            const currentBalance = Number(user.balance) || 0;
+            const newBalance = Math.max(0, currentBalance + amount);
+
+            try {
+                await fetch(`${FIREBASE_URL}/users/${targetId}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ balance: newBalance })
+                });
+
+                user.balance = newBalance;
+                if (targetId === state.user.id) {
+                    state.balance = newBalance;
+                    updateUI();
+                }
+                renderAdminUsers();
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (err) {
+                alert("Ошибка начисления!");
+            }
+        }
+
+        function adminCustomStars(targetId) {
+            const val = prompt("Введите количество звёзд для начисления (или с минусом для списания, например -50):");
+            if (val === null) return;
+            const amount = parseInt(val, 10);
+            if (isNaN(amount) || amount === 0) {
+                alert("Введите число!");
+                return;
+            }
+            adminAddStars(targetId, amount);
+        }
+
+        // ================= АПГРЕЙД =================
         function setMultiplier(mult, btn) {
             state.multiplier = mult;
             state.chance = Math.round(60 / mult);
@@ -789,7 +1068,7 @@
 
         function openSelectModal() {
             if (state.inventory.length === 0) {
-                alert("Ваш инвентарь пуст! Сначала купите предмет в магазине.");
+                alert("Инвентарь пуст!");
                 return;
             }
             const list = document.getElementById('modalItemsList');
@@ -812,16 +1091,10 @@
             document.getElementById('selectModal').classList.add('open');
         }
 
-        function closeSelectModal(e) {
-            if (!e || e.target.id === 'selectModal') {
-                document.getElementById('selectModal').classList.remove('open');
-            }
-        }
-
         function selectItemForUpgrade(index) {
             state.selectedItem = state.inventory[index];
             state.selectedItemIndex = index;
-            document.getElementById('selectModal').classList.remove('open');
+            closeModal('selectModal');
 
             const slot = document.getElementById('slotSource');
             slot.className = "slot filled";
@@ -842,19 +1115,18 @@
             const randomRot = 1440 + Math.floor(Math.random() * 360);
             wheel.style.transform = `rotate(${randomRot}deg)`;
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 const success = Math.random() * 100 < state.chance;
                 if (success) {
                     const newPrice = Math.round(state.selectedItem.price * state.multiplier);
                     state.selectedItem.price = newPrice;
                     state.selectedItem.name += ` (x${state.multiplier})`;
-                    
                     state.inventory[state.selectedItemIndex] = state.selectedItem;
-                    alert(`Успех! Предмет улучшен! Новая цена: ${newPrice} ⭐`);
+                    alert(`Успех! Предмет улучшен до ${newPrice} ⭐`);
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 } else {
                     state.inventory.splice(state.selectedItemIndex, 1);
-                    alert("К сожалению, апгрейд не удался. Предмет сгорел.");
+                    alert("Апгрейд не удался. Предмет сгорел.");
                     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
                 }
 
@@ -867,12 +1139,11 @@
                 `;
                 document.getElementById('startUpgradeBtn').disabled = true;
                 
-                saveGame();
                 updateUI();
+                await saveGameToCloud();
             }, 3000);
         }
 
-        // Initialize on load
         loadGame();
     </script>
 </body>
