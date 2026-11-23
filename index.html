@@ -749,7 +749,7 @@
         }
 
         let state = {
-            balance: 0,
+            balance: 50, // Начальный баланс 50 звёзд
             user: {
                 name: tg?.initDataUnsafe?.user?.first_name || "Player",
                 username: tg?.initDataUnsafe?.user?.username ? `@${tg.initDataUnsafe.user.username}` : "",
@@ -784,11 +784,13 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    state.balance = parsed.balance ?? 0;
+                    state.balance = parsed.balance ?? 50;
                     state.inventory = parsed.inventory ?? [];
                 } catch(e) {}
             }
             updateUI();
+            
+            // Синхронизируем с Firebase и при первом запуске автоматически записываем игрока в базу
             await syncBalanceFromCloud(true);
         }
 
@@ -798,9 +800,10 @@
                 const res = await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`);
                 const data = await res.json();
                 if (data) {
-                    state.balance = data.balance ?? 0;
+                    state.balance = data.balance ?? 50;
                     state.inventory = data.inventory || [];
                 } else {
+                    // Если игрока еще нет в базе, создаем его с 50 звездами
                     await saveGameToCloud();
                 }
                 saveLocal();
