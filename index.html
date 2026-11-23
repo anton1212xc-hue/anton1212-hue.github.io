@@ -726,7 +726,7 @@
                         <button class="admin-mini-btn" style="padding:3px 6px; font-size:11px;" onclick="changeName()">Изменить ✏️</button>
                     </div>
                     <div class="id-badge" onclick="copyUserId()">
-                        <span id="profileId">ID: 000003</span> 📋
+                        <span id="profileId">ID: 000000</span> 📋
                     </div>
                 </div>
                 <div class="profile-buttons">
@@ -885,39 +885,35 @@
         }
 
         async function loadGame() {
-            const saved = localStorage.getItem(`stardrop_${state.user.id}`);
-            if (saved) {
+            // Сначала пробуем подтянуть актуальные данные из Firebase
+            if (isFirebaseConfigured()) {
                 try {
-                    const parsed = JSON.parse(saved);
-                    state.balance = parsed.balance ?? 50;
-                    state.inventory = parsed.inventory ?? [];
-                } catch(e) {}
-            }
-            updateUI();
-            await saveGameToCloud();
-            await syncBalanceFromCloud(true);
-        }
-
-        async function syncBalanceFromCloud(silent = false) {
-            if (!isFirebaseConfigured()) return;
-            try {
-                const res = await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`);
-                const data = await res.json();
-                if (data) {
-                    state.balance = data.balance ?? 50;
-                    state.inventory = data.inventory || [];
-                    if (data.name && !localStorage.getItem('player_custom_name')) {
-                        state.user.name = data.name;
+                    const res = await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`);
+                    const data = await res.json();
+                    if (data) {
+                        state.balance = data.balance ?? 50;
+                        state.inventory = data.inventory || [];
+                        if (data.name && !localStorage.getItem('player_custom_name')) {
+                            state.user.name = data.name;
+                        }
+                    } else {
+                        // Если в базе игрока еще нет, проверяем локалсторадж или создаем с 50
+                        const saved = localStorage.getItem(`stardrop_${state.user.id}`);
+                        if (saved) {
+                            try {
+                                const parsed = JSON.parse(saved);
+                                state.balance = parsed.balance ?? 50;
+                                state.inventory = parsed.inventory ?? [];
+                            } catch(e) {}
+                        }
+                        await saveGameToCloud();
                     }
-                } else {
-                    await saveGameToCloud();
+                } catch (err) {
+                    console.error("Ошибка загрузки из облака:", err);
                 }
-                saveLocal();
-                updateUI();
-                if (!silent) alert("Баланс обновлен!");
-            } catch (err) {
-                console.error("Ошибка Firebase:", err);
             }
+            saveLocal();
+            updateUI();
         }
 
         function saveLocal() {
@@ -1274,7 +1270,7 @@
 
             // Зеленый сектор: 0 - 216 градусов (60%), Красный: 216 - 360 градусов
             const targetDeg = success ? (20 + Math.random() * 170) : (236 + Math.random() * 100);
-            const totalRot = 1440 + targetDeg; // Несколько полных оборотов + целевой угол
+            const totalRot = 1440 + targetDeg;
 
             needle.style.transform = `rotate(${totalRot}deg)`;
 
