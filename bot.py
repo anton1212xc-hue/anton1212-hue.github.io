@@ -1,4 +1,8 @@
 import os
+import time
+import threading
+import asyncio
+import requests
 import telebot
 from telebot import apihelper
 from aiohttp import web
@@ -8,6 +12,10 @@ TOKEN = "1780243426:Hv3Oka1DuzTRSFrJcMVh0N4HNEu9wHAfgGE"
 WEBAPP_URL = "https://anton1212xc-hue.github.io/anton1212-hue.github.io/"
 PORT = int(os.environ.get("PORT", 10000))
 ADMIN_ID = 1780243411  # Ваш Shuzagram ID
+
+# Получаем публичный URL вашего сервиса на Render (render автоматически задает переменные или подставьте ваш URL)
+# Например: "https://anton1212-hue-github-io.onrender.com"
+RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "")
 
 # Перенаправляем все запросы pyTelegramBotAPI на кастомный сервер Shuzagram
 apihelper.API_URL = "https://api.shuzagram.com/bot{0}/{1}"
@@ -43,14 +51,12 @@ def handle_web_app_data(message):
             f"📊 Данные: {data}"
         )
         
-        # Отправляем админу
         bot.send_message(ADMIN_ID, text, parse_mode="HTML")
-        # Отвечаем игроку
         bot.reply_to(message, "✅ Ваша заявка на вывод принята! Администратор скоро свяжется с вами.")
     except Exception as e:
         print(f"Ошибка web_app_data: {e}")
 
-# --- ВЕБ-СЕРВЕР ДЛЯ RENDER (защита от засыпания) ---
+# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
 async def handle_ping(request):
     return web.Response(text="Bot is alive and running!")
 
@@ -63,18 +69,34 @@ async def start_web_server():
     await site.start()
     print(f"Веб-сервер запущен на порту {PORT}")
 
-import threading
 def run_web_server():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(start_web_server())
     loop.run_forever()
 
+# --- ФОНОВЫЙ САМОПИНГЕР (Каждые 30 секунд) ---
+def self_ping_worker():
+    """Каждые 30 секунд стучится на собственный сервер Render, чтобы не дать ему уснуть"""
+    time.sleep(10)  # Даем серверу время запуститься
+    while True:
+        try:
+            if RENDER_EXTERNAL_URL:
+                requests.get(RENDER_EXTERNAL_URL, timeout=10)
+                print("[Self-Ping] Успешный пинг самого себя")
+        except Exception as e:
+            print(f"[Self-Ping] Ошибка пинга: {e}")
+        time.sleep(30)  интервал 30 секунд
+
 if __name__ == "__main__":
-    # Запускаем пинг-сервер в отдельном потоке
+    # 1. Запускаем веб-сервер в отдельном потоке
     server_thread = threading.Thread(target=run_web_server, daemon=True)
     server_thread.start()
+
+    # 2. Запускаем фоновый поток самопробуждения каждые 30 секунд
+    ping_thread = threading.Thread(target=self_ping_worker, daemon=True)
+    ping_thread.start()
     
-    print("Бот запущен на telebot + Shuzagram API!")
-    # Запуск бесконечного получения сообщений
+    print("Бот запущен на telebot + Shuzagram API с системой самопробуждения!")
+    # 3. Запуск бесконечного получения сообщений
     bot.infinity_polling(skip_pending=True)
