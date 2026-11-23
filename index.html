@@ -782,13 +782,13 @@
     <div class="modal-overlay" id="depositModal" onclick="closeModal('depositModal', event)">
         <div class="modal" onclick="event.stopPropagation()">
             <h3>Пополнение баланса ⭐</h3>
-            <p>Отправьте звёзды на наш аккаунт <strong style="color:var(--accent);">@media</strong> и обязательно укажите ваш игровой ID:</p>
+            <p>Отправьте звёзды на наш аккаунт <strong style="color:var(--accent);">@Knyazevsk1y</strong> и обязательно укажите ваш игровой ID:</p>
             <div style="background:#0f111a; padding:10px; border-radius:10px; text-align:center; border:1px solid var(--card-border); cursor:pointer;" onclick="copyDepositId()">
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">Ваш игровой ID (нажмите для копирования):</div>
                 <div id="modalUserId" style="font-size:16px; font-weight:800; color:var(--accent);">000000</div>
             </div>
             <p style="font-size:11px; color:var(--text-muted);">В сообщении к переводу напишите: <b>«Пополнение в боте [Ваш ID]»</b>.</p>
-            <button class="btn" onclick="copyUsernameAndId()">Скопировать @media 📋</button>
+            <button class="btn" onclick="copyUsernameAndId()">Скопировать @Knyazevsk1y 📋</button>
             <button class="btn" style="background:var(--card-border); color:#fff;" onclick="closeModal('depositModal')">Закрыть</button>
         </div>
     </div>
@@ -1034,9 +1034,9 @@
         }
 
         function copyUsernameAndId() {
-            navigator.clipboard?.writeText("@media");
+            navigator.clipboard?.writeText("@Knyazevsk1y");
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert("Юзернейм @media скопирован!");
+            alert("Юзернейм @Knyazevsk1y скопирован!");
         }
 
         function copyUserId() {
@@ -1056,7 +1056,6 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         }
 
-        // БЕЗ КОМИССИИ: возвращается полная стоимость предмета
         async function sellItem(index) {
             const item = state.inventory[index];
             state.balance += item.price; 
