@@ -366,7 +366,6 @@
             z-index: 10;
             transform-origin: bottom center;
             transform: rotate(0deg);
-            transition: transform 3s cubic-bezier(0.15, 0.85, 0.15, 1);
         }
 
         .wheel-needle::after {
@@ -885,19 +884,17 @@
         }
 
         async function loadGame() {
-            // Сначала пробуем подтянуть актуальные данные из Firebase
             if (isFirebaseConfigured()) {
                 try {
                     const res = await fetch(`${FIREBASE_URL}/users/${state.user.id}.json`);
                     const data = await res.json();
-                    if (data) {
-                        state.balance = data.balance ?? 50;
+                    if (data && data.balance !== undefined) {
+                        state.balance = data.balance;
                         state.inventory = data.inventory || [];
                         if (data.name && !localStorage.getItem('player_custom_name')) {
                             state.user.name = data.name;
                         }
                     } else {
-                        // Если в базе игрока еще нет, проверяем локалсторадж или создаем с 50
                         const saved = localStorage.getItem(`stardrop_${state.user.id}`);
                         if (saved) {
                             try {
@@ -1208,7 +1205,7 @@
             adminAddStars(targetId, amount);
         }
 
-        // ================= АПГРЕЙД (С вращающейся стрелкой) =================
+        // ================= АПГРЕЙД (С фиксированным стартом стрелки) =================
         function setMultiplier(mult, btn) {
             state.multiplier = mult;
             state.chance = Math.round(60 / mult);
@@ -1266,40 +1263,50 @@
             document.getElementById('startUpgradeBtn').disabled = true;
 
             const needle = document.getElementById('wheelNeedle');
-            const success = Math.random() * 100 < state.chance;
 
-            // Зеленый сектор: 0 - 216 градусов (60%), Красный: 216 - 360 градусов
-            const targetDeg = success ? (20 + Math.random() * 170) : (236 + Math.random() * 100);
-            const totalRot = 1440 + targetDeg;
+            // 1. Мгновенно сбрасываем стрелку в начальное положение (0 градусов) без анимации
+            needle.style.transition = 'none';
+            needle.style.transform = 'rotate(0deg)';
 
-            needle.style.transform = `rotate(${totalRot}deg)`;
+            // 2. Небольшая пауза перед запуском плавной анимации вращения
+            setTimeout(() => {
+                const success = Math.random() * 100 < state.chance;
 
-            setTimeout(async () => {
-                if (success) {
-                    const newPrice = Math.round(state.selectedItem.price * state.multiplier);
-                    state.selectedItem.price = newPrice;
-                    state.selectedItem.name += ` (x${state.multiplier})`;
-                    state.inventory[state.selectedItemIndex] = state.selectedItem;
-                    alert(`Успех! Предмет улучшен до ${newPrice} ⭐`);
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    state.inventory.splice(state.selectedItemIndex, 1);
-                    alert("К сожалению, апгрейд не удался. Предмет сгорел.");
-                    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-                }
+                // Зеленый сектор: 20° - 190°, Красный сектор: 230° - 330°
+                const targetDeg = success ? (20 + Math.random() * 170) : (230 + Math.random() * 100);
+                const totalRot = 1440 + targetDeg; // 4 полных оборота + целевой угол
 
-                state.selectedItem = null;
-                const slot = document.getElementById('slotSource');
-                slot.className = "slot";
-                slot.innerHTML = `
-                    <div class="item-icon">➕</div>
-                    <div style="font-size:12px; color:var(--text-muted)">Выберите предмет</div>
-                `;
-                document.getElementById('startUpgradeBtn').disabled = true;
-                
-                updateUI();
-                await saveGameToCloud();
-            }, 3000);
+                // Включаем плавную анимацию
+                needle.style.transition = 'transform 3s cubic-bezier(0.15, 0.85, 0.15, 1)';
+                needle.style.transform = `rotate(${totalRot}deg)`;
+
+                setTimeout(async () => {
+                    if (success) {
+                        const newPrice = Math.round(state.selectedItem.price * state.multiplier);
+                        state.selectedItem.price = newPrice;
+                        state.selectedItem.name += ` (x${state.multiplier})`;
+                        state.inventory[state.selectedItemIndex] = state.selectedItem;
+                        alert(`Успех! Предмет улучшен до ${newPrice} ⭐`);
+                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    } else {
+                        state.inventory.splice(state.selectedItemIndex, 1);
+                        alert("К сожалению, апгрейд не удался. Предмет сгорел.");
+                        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+                    }
+
+                    state.selectedItem = null;
+                    const slot = document.getElementById('slotSource');
+                    slot.className = "slot";
+                    slot.innerHTML = `
+                        <div class="item-icon">➕</div>
+                        <div style="font-size:12px; color:var(--text-muted)">Выберите предмет</div>
+                    `;
+                    document.getElementById('startUpgradeBtn').disabled = true;
+                    
+                    updateUI();
+                    await saveGameToCloud();
+                }, 3000);
+            }, 50);
         }
 
         loadGame();
