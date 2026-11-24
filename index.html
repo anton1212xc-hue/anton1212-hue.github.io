@@ -317,6 +317,12 @@
             border-color: var(--accent);
         }
 
+        .mult-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         /* Wheel & Needle Container */
         .wheel-container {
             position: relative;
@@ -1270,6 +1276,9 @@
             if (!state.selectedItem) return;
             document.getElementById('startUpgradeBtn').disabled = true;
 
+            // Блокируем кнопки множителей на время анимации
+            document.querySelectorAll('.mult-btn').forEach(btn => btn.disabled = true);
+
             const needle = document.getElementById('wheelNeedle');
 
             needle.style.transition = 'none';
@@ -1308,6 +1317,9 @@
                     `;
                     document.getElementById('startUpgradeBtn').disabled = true;
                     
+                    // Разблокируем кнопки множителей обратно
+                    document.querySelectorAll('.mult-btn').forEach(btn => btn.disabled = false);
+
                     updateUI();
                     await saveGameToCloud();
                 }, 3000);
